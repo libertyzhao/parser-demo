@@ -4,5 +4,5 @@
 
 输入异常，会给予相应的报错。
 
-<img width="350"  src="https://github.com/liberties/mini-calculator/blob/master/assets/1.png"/>
+<img width="450"  src="https://github.com/liberties/mini-calculator/blob/master/assets/1.png"/>
 
