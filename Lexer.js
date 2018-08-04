@@ -71,6 +71,7 @@ class Lexer {
     this.lookAhead = this.lex();
   }
   setInputString(inputString){
+    this.clear();
     this.inputString = inputString;
   }
   runLexer(inputString) {
