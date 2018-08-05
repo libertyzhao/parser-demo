@@ -26,10 +26,7 @@ class Parser {
     this.top--;
     return this.stack.pop();
   }
-  runParser(inputString) {
-    console.log(`输入公式：`)
-    console.log(inputString);
-    this.lexer.setInputString(inputString);
+  runParser() {
     this.statements();
   }
   statements() {
@@ -42,9 +39,10 @@ class Parser {
         this.lexer.advance();
       } else {
         // 后面不是分号，错误。
+        let info = this.lexer.input.getTokenInfo();
         console.error(
-          `line: ${this.lexer.row}, col: ${
-            this.lexer.col
+          `line: ${info.row}, col: ${
+            info.mark
           }, expected ';' , but got ${this.lexer.symbol}`
         );
         process.exit(0)
@@ -69,9 +67,10 @@ class Parser {
 
     if (this.lexer.match(Lexer.ILLEGAL_SYMBOL)) {
       // 要么是加号，要么是空，出现了其他的就是错误
+      let info = this.lexer.input.getTokenInfo();
       console.error(
-        `line: ${this.lexer.row}, col: ${
-          this.lexer.col
+        `line: ${info.row}, col: ${
+          info.mark
         }, expected '+' or '' , but got ${this.lexer.symbol}`
       );
       process.exit(0)
@@ -94,9 +93,10 @@ class Parser {
 
     if (this.lexer.match(Lexer.ILLEGAL_SYMBOL)) {
       // 必须是乘号开头，其他的就错了
+      let info = this.lexer.input.getTokenInfo();
       console.error(
-        `line: ${this.lexer.row}, col: ${
-          this.lexer.col
+        `line: ${info.row}, col: ${
+          info.mark
         }, expected '*' or '' , but got ${this.lexer.symbol}`
       );
       process.exit(0)
@@ -111,22 +111,25 @@ class Parser {
     } else if (this.lexer.match(Lexer.LP)) {
       this.lexer.advance();
       this.expression();
+
       if (this.lexer.match(Lexer.RP)) {
         this.lexer.advance();
       } else {
         // 末尾必须是右括号，否则错误
+        let info = this.lexer.input.getTokenInfo();
         console.error(
-          `line: ${this.lexer.row}, col: ${
-            this.lexer.col
+          `line: ${info.row}, col: ${
+            info.mark
           }, expected ')' , but got ${this.lexer.symbol}`
         );
         process.exit(0)
       }
     } else {
       // 要么NUM，要么LP，其他都错误
+      let info = this.lexer.input.getTokenInfo();
       console.error(
-        `line: ${this.lexer.row}, col: ${
-          this.lexer.col
+        `line: ${info.row}, col: ${
+          info.mark
         }, expected number or '(' , but got ${this.lexer.symbol}`
       );
       process.exit(0)
