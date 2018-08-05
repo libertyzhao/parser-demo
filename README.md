@@ -1,8 +1,5 @@
-### 简易运算小玩具
+####词法分析程序的练手小demo
 
-一个简易的运算编译器，个人练手的小玩具，支持加法和乘法，表达式以分号结尾。
-
-输入异常，会给予相应的报错。
-
-<img width="450"  src="https://github.com/liberties/mini-calculator/blob/master/assets/1.png"/>
-
+- 判断一个数字是整数还是小数的状态机
+- 简易运算小玩具
+- 正则引擎（正在写）
