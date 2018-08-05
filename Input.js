@@ -37,7 +37,6 @@ class Input {
   }
   // 直接获得下一个单词
   lookAheadToken() {
-    this.skipSpace();
     return this.getNextToken();
   }
   // 跳过空格
@@ -59,7 +58,7 @@ class Input {
     }
 
     this.spaceSize = spaceSize
-
+    // 自动跳过空白处
     this.advance(index);
   }
   // 获取下一个单词
