@@ -1,3 +1,5 @@
+// 文本控制器，在这里获取文本的节点，希望能够方便的获取下一个单词或者其他的。
+
 class Input {
   constructor() {
     this.startBuf = ""; // 数据载体
