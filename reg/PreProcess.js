@@ -1,3 +1,5 @@
+//预处理，提前替换掉输入里面的宏内容
+
 let Input = require("./Input");
 
 class PreProcess {
@@ -70,7 +72,7 @@ class PreProcess {
       }
     }
 
-    console.log('宏替换：' + content);
+    console.log('宏替换后：' + content);
     return content;
   }
 }
