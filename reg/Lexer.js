@@ -9,7 +9,7 @@ class Lexer {
     this.initTokenMap();
   }
   initTokenMap() {
-    // 除了下面的特殊符号，其他都是LITERAL
+    // 除了下面的特殊符号，其他都是LITERAL，暂时先不换成ascii值
     this.tokenMap["."] = Lexer.ANY;
     this.tokenMap["^"] = Lexer.AT_BOL;
     this.tokenMap["$"] = Lexer.AT_EOL;
@@ -17,17 +17,20 @@ class Lexer {
     this.tokenMap["["] = Lexer.CCL_START;
     this.tokenMap[")"] = Lexer.CLOSE_PAREN;
     this.tokenMap["*"] = Lexer.CLOSURE;
-    this.tokenMap["-"] = Lexer.DASH;
+    this.tokenMap["-"] = Lexer.CONNECT;
     this.tokenMap["("] = Lexer.OPEN_PAREN;
     this.tokenMap["?"] = Lexer.OPTIONAL;
     this.tokenMap["|"] = Lexer.OR;
     this.tokenMap["+"] = Lexer.PLUS_CLOSE;
   }
+  get symbol(){
+    return this.input.symbol;
+  }
   lex() {
     let step = 1,
       token = this.input.lookAhead(step);
-    if (token === Input.EOF) {
-      return Input.EOF;
+    if (token === Lexer.EOF) {
+      return Lexer.EOF;
     }
     if (token === "\\") {
       token = this.handleTransform(++step);
@@ -41,7 +44,7 @@ class Lexer {
 
     switch (token) {
       case "\\\\":
-        return "\\";
+        return "\\\\";
       case "\b":
         return "\b";
       case "\d":
@@ -80,12 +83,13 @@ Object.assign(Lexer, {
   CCL_START: "CCL_START", //字符集类开始括号 [
   CLOSE_PAREN: "CLOSE_PAREN", //)
   CLOSURE: "CLOSURE", //*
-  DASH: "DASH", // -
+  CONNECT: "CONNECT", // -
   LITERAL: "LITERAL", //字符常量
   OPEN_PAREN: "OPEN_PAREN", // (
   OPTIONAL: "OPTIONAL", //?
   OR: "OR", // |
-  PLUS_CLOSE: "PLUS_CLOSE" // +
+  PLUS_CLOSE: "PLUS_CLOSE", // +
+  EOF: Input.EOF, // 输入流结尾
 });
 
 module.exports = Lexer;
