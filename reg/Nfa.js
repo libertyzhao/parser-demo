@@ -4,7 +4,7 @@ const ASCII_COUNT = 128;
 
 class Nfa {
   constructor() {
-    this.edge = ""; // 设定边的属性，ascii里面128个或者是EPSILON、CCL、EMPTY
+    this.edge = Nfa.EPSILON; // 设定边的属性，ascii里面128个或者是EPSILON、CCL、EMPTY，默认是EPSILON
     this.next = undefined; // 跳转的下一个状态，可以是空
     this.next2 = undefined; // 跳转的另一个状态，当状态含有两条ε边时，这个指针才有效
     this.statusNumber = -1; // 状态编号
