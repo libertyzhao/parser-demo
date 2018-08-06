@@ -11,5 +11,4 @@ let nfaMachine = new NfaMachine(lexer);
 let inputString = `[^a-zA-Z]`;
 console.log(`输入公式：${inputString}`);
 input.setInput(preProcess.process(inputString));
-
 nfaMachine.run();
