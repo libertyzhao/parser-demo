@@ -5,18 +5,75 @@ let Nfa = require("./Nfa");
 let Lexer = require("./Lexer");
 let NfaPair = require("./NfaPair");
 let Print = require("./Print");
+let Input = require("./Input");
 
 class NfaMachine {
   constructor(lexer) {
     this.NfaManage = new NfaManage();
     this.lexer = lexer;
+    this.nfaCollection = new Set();
+    this.input = new Input();
+    this.nfaPair; // 记录整个图
   }
+  // 构造图
   run() {
     let nfaPair = new NfaPair();
     // this.term(nfaPair);
     this.expr(nfaPair);
-
+    this.nfaPair = nfaPair;
+    console.log(`起点：${nfaPair.startNode.statusNumber}`)
+    console.log(`终点：${nfaPair.endNode.statusNumber}`)
     Print.printNfa(nfaPair.startNode);
+  }
+  clear() {
+    this.nfaCollection.clear();
+  }
+  // 测试字符串能否通过正则
+  test(inputString) {
+    this.clear();
+    this.nfaCollection.add(this.nfaPair.startNode);
+
+    this.input.setInput(inputString);
+
+    let token;
+
+    while ((token = this.input.lookAhead(1)) !== Input.EOF) {
+      this.input.advance(1);
+      this.moveEpsilon();
+      this.nfaCollection = this.move(this.nfaCollection, token.charCodeAt());
+    }
+    this.moveEpsilon();
+
+    if (this.nfaCollection.has(this.nfaPair.endNode)) {
+      console.log(`通过`);
+    } else {
+      console.log(`不通过`);
+    }
+  }
+  moveEpsilon() {
+    let done = false, length;
+    while (!done) {
+      let newNfaCollect = this.move(this.nfaCollection, Nfa.EPSILON);
+      length = this.nfaCollection.size;
+      // 循环直到NfaCollection不发生变化的时候才结束
+      for(let node of newNfaCollect){
+        this.nfaCollection.add(node);
+      }
+      done = length === this.nfaCollection.size;
+    }
+  }
+  // 移动
+  move(nfaCollect, input) {
+    let newNfaCollect = new Set();
+    for (let node of nfaCollect) {
+      if (node.inputSet.has(input) && node.next) {
+        newNfaCollect.add(node.next);
+        if (node.next2) {
+          newNfaCollect.add(node.next2);
+        }
+      }
+    }
+    return newNfaCollect;
   }
   // 或操作 |
   expr(nfaPair) {
@@ -29,7 +86,7 @@ class NfaMachine {
      */
     let start, end;
     let orNfaPair = new NfaPair();
-    this.cat_expr(nfaPair)
+    this.cat_expr(nfaPair);
     while (this.lexer.match(Lexer.OR)) {
       this.lexer.advance();
       this.cat_expr(orNfaPair);
@@ -43,8 +100,8 @@ class NfaMachine {
       start.next2 = orNfaPair.startNode;
       orNfaPair.endNode.next = end;
     }
-    nfaPair.startNode = start;
-    nfaPair.endNode = end;
+    start && (nfaPair.startNode = start);
+    end && (nfaPair.endNode = end);
     return true;
   }
   // b . [a-z]三种的抽象描述
@@ -52,7 +109,7 @@ class NfaMachine {
     // 在每次进行匹配的时候，先看看后面是不是括号
     let bool = this.exprParentheses(nfaPair);
     // 先看是不是单字符 b
-    if(!bool){
+    if (!bool) {
       bool = this.nfaForSingleCharacter(nfaPair);
     }
     // 再看是不是特殊字符点 .
@@ -89,7 +146,10 @@ class NfaMachine {
      */
     let start, end;
 
-    while (!this.lexer.match(Lexer.EOF) && this.checkError(this.lexer.nextWordType)) {
+    while (
+      !this.lexer.match(Lexer.EOF) &&
+      this.checkError(this.lexer.nextWordType)
+    ) {
       this.factor(nfaPair);
       if (!start) {
         start = nfaPair.startNode;
@@ -102,13 +162,13 @@ class NfaMachine {
     nfaPair.endNode = end;
     return true;
   }
-  exprParentheses(nfaPair){
-    if(this.lexer.match(Lexer.OPEN_PAREN)){
+  exprParentheses(nfaPair) {
+    if (this.lexer.match(Lexer.OPEN_PAREN)) {
       this.lexer.advance();
-      this.expr(nfaPair)
-      if(this.lexer.match(Lexer.CLOSE_PAREN)){
+      this.expr(nfaPair);
+      if (this.lexer.match(Lexer.CLOSE_PAREN)) {
         this.lexer.advance();
-      }else{
+      } else {
         throw Error(`expected ), but got this.lexer.symbol`);
       }
       return true;
@@ -117,7 +177,13 @@ class NfaMachine {
   }
   // 匹配单个字符，b
   nfaForSingleCharacter(nfaPair) {
-    if (!this.lexer.match(Lexer.LITERAL)) {
+      let transformStatus = false;
+    if (this.lexer.match(Lexer.TRANSFORM)) {
+        this.lexer.advance();
+        // transform之后的状态，无视literal
+        transformStatus = true;
+    }
+    if (!transformStatus && !this.lexer.match(Lexer.LITERAL)) {
       return false;
     }
     nfaPair.startNode = this.NfaManage.getNfa();
@@ -193,6 +259,9 @@ class NfaMachine {
             node.addSetAsciiCode(i);
           }
         }
+      } else {
+        // 后面不是连接符，就是单个字符直接的连接
+        node.addSetAsciiCode(start);
       }
     }
   }

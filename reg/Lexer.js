@@ -5,7 +5,8 @@ class Lexer {
   constructor(input) {
     this.tokenMap = new Array(ASCII_COUNT);
     this.input = input;
-    this.nextWordType = -1;
+    this.nextWordType = -1; // 后面一个字符的类型
+    this.step = 1; // 前看几步
     this.initTokenMap();
   }
   initTokenMap() {
@@ -23,54 +24,56 @@ class Lexer {
     this.tokenMap["|"] = Lexer.OR;
     this.tokenMap["+"] = Lexer.PLUS_CLOSE;
   }
-  get symbol(){
+  get symbol() {
     return this.input.symbol;
   }
   lex() {
-    let step = 1,
-      token = this.input.lookAhead(step);
+    let token = this.input.lookAhead(this.step);
     if (token === Lexer.EOF) {
       return Lexer.EOF;
     }
     if (token === "\\") {
-      token = this.handleTransform(++step);
+      // 进了转义的，所有token应该都在ascii里面
+      token = this.handleTransform();
+      this.nextWordType = Lexer.TRANSFORM;
+      return this.nextWordType;
     }
-    this.input.advance(step);
+
     this.nextWordType = this.tokenMap[token];
     return this.nextWordType || Lexer.LITERAL;
   }
-  handleTransform(step) {
-    let token = this.input.lookAhead(step);
+  handleTransform() {
+    let token = this.input.lookAhead(2);
 
     switch (token) {
-      case "\\\\":
-        return "\\\\";
-      case "\b":
-        return "\b";
-      case "\d":
-        return "\d";
-      case "\f":
-        return "\f";
-      case "\n":
-        return "\n";
-      case "\r":
-        return "\r";
-      case "\s":
-        return "\s";
-      case "\w":
-        return "\w";
-      default:
-        return `\\${token}`;
+      case "\\b":
+        token = "\b";
+      case "\\d":
+        token = "\d";
+      case "\\f":
+        token = "\f";
+      case "\\n":
+        token = "\n";
+      case "\\r":
+        token = "\r";
+      case "\\s":
+        token = "\s";
+      case "\\w":
+        token = "\w";
+      default :
+        token = token.slice(1);
     }
+    return token.charCodeAt();
   }
   match(token) {
     if (this.nextWordType === -1) {
-      this.advance();
+      this.nextWordType = this.lex();
     }
     return token == this.nextWordType;
   }
   // 前看符号持续推进，下次match的时候，肯定是看后面的一个符号是不是自己想要的
   advance() {
+    this.input.advance(this.step);
     this.nextWordType = this.lex();
   }
 }
@@ -89,7 +92,8 @@ Object.assign(Lexer, {
   OPTIONAL: "OPTIONAL", //?
   OR: "OR", // |
   PLUS_CLOSE: "PLUS_CLOSE", // +
-  EOF: Input.EOF, // 输入流结尾
+  TRANSFORM: "TRANSFORM", // \
+  EOF: Input.EOF // 输入流结尾
 });
 
 module.exports = Lexer;

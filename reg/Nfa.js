@@ -9,7 +9,7 @@ class Nfa {
     this.next2 = undefined; // 跳转的另一个状态，当状态含有两条ε边时，这个指针才有效
     this.statusNumber = -1; // 状态编号
     this.visited = false; // 是否访问过，用来打印的时候调用
-    this.inputSet = new Set(); //  用来存储字符集，里面是ascii值
+    this.inputSet = new Set([Nfa.EPSILON]); //  用来存储字符集，里面是ascii值,默认有个EPSILON
   }
   setVisited(){
       this.visited = true;
@@ -21,10 +21,15 @@ class Nfa {
     this.statusNumber = number;
   }
   addSetAsciiCode(val){
+    this.deleteEpsilon();
     this.inputSet.add(val);
   }
   addSet(val){
+    this.deleteEpsilon();
     this.inputSet.add(val.charCodeAt());
+  }
+  deleteEpsilon(){
+    this.inputSet.delete(Nfa.EPSILON);
   }
   // 将set里面的内容取反，比如本来有1,取反之后就是除了1以外的所有ascii的值
   reverseFill(){
@@ -36,6 +41,7 @@ class Nfa {
         set.add(i);
     }
     this.inputSet = set;
+    this.deleteEpsilon();
   }
   clear() {
     this.edge = "";
