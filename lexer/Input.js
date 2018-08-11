@@ -61,7 +61,7 @@ class Input {
     }
 
     this.spaceSize = spaceSize
-    // 自动跳过空白处
+
     this.advance(index);
   }
   // 获取下一个单词
@@ -109,8 +109,6 @@ class Input {
   }
   setInput(inputString) {
     this.clear();
-    console.log(`输入公式：`);
-    console.log(inputString);
     this.startBuf = inputString;
   }
 }
@@ -118,11 +116,3 @@ class Input {
 Input.EOF = undefined;
 
 module.exports = Input;
-
-// let input = new Input();
-// input.setInput(`i  am lizige`);
-// console.log(input.lookAheadToken());
-// console.log(input.lookAheadToken());
-// console.log(input.lookAheadToken());
-// console.log(input.lookAheadToken());
-// console.log(input.lookAheadToken());
