@@ -1,13 +1,14 @@
-let Input = require('./Input');
-let Lexer = require('./Lexer');
-let BasicParser = require('./BasicParser');
-let ImprovedParser = require('./ImprovedParser');
-let Parser = require('./Parser');
-let ArgumentParser = require('./ArgumentParser');
+const Input = require('./Input');
+const Lexer = require('./Lexer');
+const BasicParser = require('./BasicParser');
+const ImprovedParser = require('./ImprovedParser');
+const Parser = require('./Parser');
+const ArgumentParser = require('./ArgumentParser');
+const TopdownPaserWithParseTable = require('./TopdownPaserWithParseTable');
 
-let input = new Input();
-let lexer = new Lexer(input);
-let parser = new ArgumentParser(lexer);
-input.setInput(`1   +   2* 3 ;`);
+const input = new Input();
+input.setInput(`1+(2*3);`);
+const lexer = new Lexer(input);
+const parser = new TopdownPaserWithParseTable(lexer);
 // lexer.runLexer();
-parser.statements()
+parser.parser();

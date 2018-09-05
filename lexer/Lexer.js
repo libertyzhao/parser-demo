@@ -1,4 +1,3 @@
-
 // 排除NAN
 function isNumber(num) {
   num = parseInt(num, 10);
@@ -9,7 +8,7 @@ class Lexer {
   constructor(input) {
     this.symbol = ""; // 当前的词法内容是什么
 
-    this.nextWordType = -1; // 前看符号的类型
+    this.lookAhead = -1; // 前看符号的类型
 
     this.input = input; // 输入控制器
   }
@@ -52,19 +51,19 @@ class Lexer {
     return Lexer.EOI;
   }
   match(token) {
-    if (this.nextWordType === -1) {
+    if (this.lookAhead === -1) {
       this.advance();
     }
-    return token == this.nextWordType;
+    return token == this.lookAhead;
   }
   // 前看符号持续推进，下次match的时候，肯定是看后面的一个符号是不是自己想要的
   advance() {
-    this.nextWordType = this.lex();
+    this.lookAhead = this.lex();
   }
   runLexer() {
     // 看一下是否到了结尾
     while (!this.match(Lexer.EOI)) {
-      console.log(`Token: ${this.nextWordType}, Symbol: ${this.symbol}`);
+      console.log(`Token: ${this.lookAhead}, Symbol: ${this.symbol}`);
       this.advance();
     }
   }
@@ -72,14 +71,15 @@ class Lexer {
 
 // 添加静态属性
 Object.assign(Lexer, {
-  PLUS: "PLUS",
-  TIMES: "TIMES",
-  LP: "LP",
-  RP: "RP",
-  NUM: "NUM",
-  SEMI: "SEMI",
-  EOI: "EOI",
-  ILLEGAL_SYMBOL: "ILLEGAL_SYMBOL"
+  PLUS: 2,
+  TIMES: 3,
+  LP: 5,
+  RP: 6,
+  NUM: 4,
+  SEMI: 1,
+  EOI: 0,
+  WHITE_SPACE: 7,
+  ILLEGAL_SYMBOL: 8
 });
 
-module.exports = Lexer
+module.exports = Lexer;
