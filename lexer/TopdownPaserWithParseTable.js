@@ -1,4 +1,4 @@
-const SYMBOL = require("./SymbolDefine");
+const { SYMBOL } = require("./SymbolDefine");
 const Attribute = require("./Attribute");
 const ParseTable = require("./ParseTable");
 const Lexer = require("./Lexer");

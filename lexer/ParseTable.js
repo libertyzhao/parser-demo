@@ -1,5 +1,5 @@
 // 用来实现推倒表
-const SYMBOL = require("./SymbolDefine");
+const { SYMBOL } = require("./SymbolDefine");
 
 class ParseTable {
   constructor() {
@@ -72,13 +72,13 @@ class ParseTable {
     this.yyd[SYMBOL.TERM_PRIME - this.rowBase] = [-1, 7, 7, 6, -1, -1, 7];
   }
 
-  getWhatToDo(topSymbol, lookAheadSymbol){
-    return this.yyd[topSymbol - this.rowBase][lookAheadSymbol]
+  getWhatToDo(topSymbol, lookAheadSymbol) {
+    return this.yyd[topSymbol - this.rowBase][lookAheadSymbol];
   }
 
-  getPushTableItems(whatToDo){
+  getPushTableItems(whatToDo) {
     return this.yyPushTable[whatToDo];
   }
 }
 
-module.exports = ParseTable
+module.exports = ParseTable;

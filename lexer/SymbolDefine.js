@@ -23,4 +23,23 @@ const SYMBOL = {
   UNKNOWN_SYMBOL: 8
 };
 
-module.exports = SYMBOL;
+const TYPE_TO_SYMBOL = {
+  [SYMBOL.EXPR]: "EXPR",
+  [SYMBOL.EXPR_PRIME]: "EXPR_PRIME",
+  [SYMBOL.FACTOR]: "FACTOR",
+  [SYMBOL.STMT]: "STMT",
+  [SYMBOL.TERM]: "TERM",
+  [SYMBOL.TERM_PRIME]: "TERM_PRIME",
+  [SYMBOL.LP]: "LP",
+  [SYMBOL.NUM_OR_ID]: "NUM_OR_ID",
+  [SYMBOL.PLUS]: "PLUS",
+  [SYMBOL.RP]: "RP",
+  [SYMBOL.SEMI]: "SEMI",
+  [SYMBOL.TIMES]: "TIMES"
+};
+
+function getSymbolStr(symbolType) {
+  return TYPE_TO_SYMBOL[symbolType];
+}
+
+module.exports = { SYMBOL, getSymbolStr };
