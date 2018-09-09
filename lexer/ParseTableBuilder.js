@@ -2,6 +2,11 @@
  * 构建一个first集
  * 1、如果a是一个终结符，那么first(a) = {a} ,对于推导式 s -> a b，first(s) = {a}.
  * 2、如果a是一个nullable的非终结符，那么对于 s -> a b，first(s) = {a,b}
+ *
+ * 构建一个follow集
+ * 1、如果一个非终结符a后面跟着一个终结符b，那么follow(a) = {b},
+ * 2、如果一个非终结符a在推导式b的末尾，形如：b -> c d a，那么follow(a) = follow(b),
+ * 3、如果一个非终结符a后面跟着一个nullable的非终结符b，形如 c -> a b，那么 follow(a) = follow(b) + follow(c)
  */
 
 var { SYMBOL, getSymbolStr } = require("./SymbolDefine");
@@ -102,7 +107,6 @@ class ParseTableBuilder {
           }
         }
       }
-      this.printFirstSet();
       if (!this.updateStatus) {
         break;
       }
@@ -112,10 +116,10 @@ class ParseTableBuilder {
   }
 
   needUpdate(parent, child) {
-    let bool = true;
+    let bool = false;
     for (let val of child) {
       if (!parent.has(val)) {
-        bool = false;
+        bool = true;
         break;
       }
     }
@@ -124,7 +128,7 @@ class ParseTableBuilder {
 
   addFirstSet(token, deriveList, idx) {
     const firstToken = this.tokenMap[deriveList[idx]];
-    if (!this.needUpdate(token.firstSet, firstToken.firstSet)) {
+    if (this.needUpdate(token.firstSet, firstToken.firstSet)) {
       this.updateStatus = true;
       token.firstSetAddSet(firstToken.firstSet);
     }
@@ -133,19 +137,63 @@ class ParseTableBuilder {
     }
   }
 
-  printFirstSet() {
-    console.log(`------------`);
+  printFirstSet(key) {
     for (let i = 0; i < this.tokenArr.length; i++) {
       const token = this.tokenArr[i],
-        firstSet = token.firstSet;
-      if(token.deriveList){
-        let str = getSymbolStr(token.val) + "{ ";
-        for (let val of firstSet) {
+        set = token[key];
+      if (token.deriveList && set) {
+        let str = getSymbolStr(token.val) + " : { ";
+        for (let val of set) {
           str += getSymbolStr(val) + ", ";
         }
         str += "}";
         console.log(str);
       }
+    }
+  }
+
+  runFollowSet() {
+    while (true) {
+      this.updateStatus = false;
+      for (let i = 0; i < this.tokenArr.length; i++) {
+        const token = this.tokenArr[i],
+          deriveLists = token.deriveList;
+        if (deriveLists && deriveLists.length > 0) {
+          for (let j = 0; j < deriveLists.length; j++) {
+            this.addFollowSet(token, deriveLists[j]);
+          }
+        }
+      }
+      if (!this.updateStatus) {
+        break;
+      }
+    }
+  }
+
+  addFollowSet(token, deriveList) {
+    for (let idx = 0; idx < deriveList.length; idx++) {
+      const deriveToken = this.tokenMap[deriveList[idx]];
+      let targetToken = deriveToken,
+        followToken = token,
+        setType = "followSet";
+      if (idx + 1 < deriveList.length) {
+        followToken = this.tokenMap[deriveList[idx + 1]];
+        setType = "firstSet";
+      }
+      this.updateFollowSet(targetToken, followToken[setType])
+      // 如果后面是nullable的值，那么它的follow集包含左边token的follow集
+      if(idx + 1 < deriveList.length && this.tokenMap[deriveList[idx + 1]].isNullable){
+        followToken = token;
+        setType = "followSet";
+        this.updateFollowSet(targetToken, followToken[setType])
+      }
+    }
+  }
+
+  updateFollowSet(targetToken, followSet){
+    if (this.needUpdate(targetToken.followSet, followSet)) {
+      targetToken.followSetAddSet(followSet);
+      this.updateStatus = true;
     }
   }
 }

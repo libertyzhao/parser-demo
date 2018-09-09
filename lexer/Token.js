@@ -4,19 +4,25 @@ class Token {
   constructor(val, isNullable, deriveList) {
     this.isNullable = isNullable;
     this.firstSet = new Set();
+    this.followSet = new Set();
     this.val = val;
     this.text = getSymbolStr(val);
     if (deriveList === null) {
-      this._firstSetAdd(val);
+      this._setAdd(this.firstSet, val);
     }
     this.deriveList = deriveList;
   }
-  _firstSetAdd(val) {
-    this.firstSet.add(val);
+  _setAdd(set, val) {
+    set.add(val);
   }
-  firstSetAddSet(list) {
-    for (let value of list) {
-      this._firstSetAdd(value);
+  firstSetAddSet(addSet) {
+    for (let value of addSet) {
+      this._setAdd(this.firstSet, value);
+    }
+  }
+  followSetAddSet(addSet) {
+    for (let value of addSet) {
+      this._setAdd(this.followSet, value);
     }
   }
 }

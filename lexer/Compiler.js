@@ -10,6 +10,12 @@ const ParseTableBuilder = require('./ParseTableBuilder');
 parseTableBuilder = new ParseTableBuilder();
 parseTableBuilder.runFirstSet();
 
+parseTableBuilder.runFollowSet();
+console.log('------firstSet------')
+parseTableBuilder.printFirstSet('firstSet');
+console.log('------followSet------')
+parseTableBuilder.printFirstSet('followSet');
+
 // const input = new Input();
 // input.setInput(`1+(2*3);`);
 // const lexer = new Lexer(input);
