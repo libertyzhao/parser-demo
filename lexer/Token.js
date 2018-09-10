@@ -5,6 +5,7 @@ class Token {
     this.isNullable = isNullable;
     this.firstSet = new Set();
     this.followSet = new Set();
+    this.selectionSet = [];
     this.val = val;
     this.text = getSymbolStr(val);
     if (deriveList === null) {
@@ -24,6 +25,9 @@ class Token {
     for (let value of addSet) {
       this._setAdd(this.followSet, value);
     }
+  }
+  selectionSetAddSet(addSet){
+    this.selectionSet.push(addSet);
   }
 }
 

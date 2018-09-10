@@ -7,15 +7,24 @@
  * 1、如果一个非终结符a后面跟着一个终结符b，那么follow(a) = {b},
  * 2、如果一个非终结符a在推导式b的末尾，形如：b -> c d a，那么follow(a) = follow(b),
  * 3、如果一个非终结符a后面跟着一个nullable的非终结符b，形如 c -> a b，那么 follow(a) = follow(b) + follow(c)
+ *
+ * 构建一个select集
+ * 1、对于一个推导式 s -> a b，如果a是0个或多个nullable非终结符，当b为终结符时，那么select(s) = firstSet(a) + firstSet(b),
+ * 2、对于一个推导式 s -> a b，如果a是0个或多个nullable非终结符，当b为非nullable的非终结符时，那么select(s) = firstSet(a) + follow(b),
+ * 3、对于一个推导式 s -> a b，如果a是一个nullable的非终结符，select(s) = followSet(s)
+ *
+ * 构建解析表
+ *    其实就是把select集拿出来，放到解析表中
  */
 
-var { SYMBOL, getSymbolStr } = require("./SymbolDefine");
-var Token = require("./Token");
+const { SYMBOL, getSymbolStr } = require("./SymbolDefine");
+const Token = require("./Token");
 
 class ParseTableBuilder {
   constructor() {
     this.tokenArr = [];
     this.tokenMap = {};
+    this.parseTable = {};
     this.updateStatus = false;
     this.init();
   }
@@ -137,21 +146,6 @@ class ParseTableBuilder {
     }
   }
 
-  printFirstSet(key) {
-    for (let i = 0; i < this.tokenArr.length; i++) {
-      const token = this.tokenArr[i],
-        set = token[key];
-      if (token.deriveList && set) {
-        let str = getSymbolStr(token.val) + " : { ";
-        for (let val of set) {
-          str += getSymbolStr(val) + ", ";
-        }
-        str += "}";
-        console.log(str);
-      }
-    }
-  }
-
   runFollowSet() {
     while (true) {
       this.updateStatus = false;
@@ -180,20 +174,100 @@ class ParseTableBuilder {
         followToken = this.tokenMap[deriveList[idx + 1]];
         setType = "firstSet";
       }
-      this.updateFollowSet(targetToken, followToken[setType])
+      this.updateFollowSet(targetToken, followToken[setType]);
       // 如果后面是nullable的值，那么它的follow集包含左边token的follow集
-      if(idx + 1 < deriveList.length && this.tokenMap[deriveList[idx + 1]].isNullable){
+      if (
+        idx + 1 < deriveList.length &&
+        this.tokenMap[deriveList[idx + 1]].isNullable
+      ) {
         followToken = token;
         setType = "followSet";
-        this.updateFollowSet(targetToken, followToken[setType])
+        this.updateFollowSet(targetToken, followToken[setType]);
       }
     }
   }
 
-  updateFollowSet(targetToken, followSet){
+  updateFollowSet(targetToken, followSet) {
     if (this.needUpdate(targetToken.followSet, followSet)) {
       targetToken.followSetAddSet(followSet);
       this.updateStatus = true;
+    }
+  }
+
+  runSelectionSet() {
+    this.runFirstSet();
+    this.runFollowSet();
+
+    for (let i = 0; i < this.tokenArr.length; i++) {
+      const token = this.tokenArr[i],
+        deriveLists = token.deriveList;
+      if (deriveLists && deriveLists.length > 0) {
+        for (let j = 0; j < deriveLists.length; j++) {
+          this.addSelectionSet(token, deriveLists[j]);
+        }
+      }
+      if (token.isNullable) {
+        token.selectionSetAddSet([...token.followSet]);
+      }
+    }
+  }
+
+  addSelectionSet(token, deriveList) {
+    let nullableFirstSet = [];
+    for (let idx = 0; idx < deriveList.length; idx++) {
+      const deriveToken = this.tokenMap[deriveList[idx]];
+      nullableFirstSet = nullableFirstSet.concat([...deriveToken.firstSet]);
+      if (!deriveToken.isNullable) {
+        token.selectionSetAddSet(nullableFirstSet);
+        break;
+      } else if (deriveToken.isNullable && idx === deriveList.length - 1) {
+        token.selectionSetAddSet(
+          nullableFirstSet.concat([...deriveToken.followSet])
+        );
+      }
+    }
+  }
+
+  printSet(key) {
+    for (let i = 0; i < this.tokenArr.length; i++) {
+      const token = this.tokenArr[i],
+        set = token[key];
+      if (key === "selectionSet") {
+        for (let list of set) {
+          consoleSingle(token, list);
+        }
+      } else {
+        consoleSingle(token, set);
+      }
+    }
+
+    function consoleSingle(token, set) {
+      if (token.deriveList && set) {
+        let str = getSymbolStr(token.val) + " : { ";
+        for (let val of set) {
+          str += getSymbolStr(val) + ", ";
+        }
+        str += "}";
+        console.log(str);
+      }
+    }
+  }
+
+  initParseTable() {
+    this.runSelectionSet();
+    let index = 0;
+    for (let i = 0; i < this.tokenArr.length; i++) {
+      const token = this.tokenArr[i];
+      if (token.selectionSet && token.selectionSet.length > 0) {
+        this.parseTable[token.val] = {};
+        for (let j = 0; j < token.selectionSet.length; j++) {
+          const selectionSet = token.selectionSet[j];
+          selectionSet.forEach(val => {
+            this.parseTable[token.val][val] = index;
+          });
+          index++;
+        }
+      }
     }
   }
 }

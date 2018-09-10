@@ -1,4 +1,5 @@
 const SYMBOL = {
+  BASE: 256,
   EXPR: 257,
   EXPR_PRIME: 259,
   FACTOR: 260,
