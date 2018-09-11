@@ -6,10 +6,19 @@ const Parser = require('./Parser');
 const ArgumentParser = require('./ArgumentParser');
 const TopdownPaserWithParseTable = require('./TopdownPaserWithParseTable');
 
-const input = new Input();
-input.setInput(`1+(2*3);`);
-const lexer = new Lexer(input);
+const ParseTableBuilder = require('./ParseTableBuilder');
+parseTableBuilder = new ParseTableBuilder();
+parseTableBuilder.initParseTable();
+console.log('------firstSet------')
+parseTableBuilder.printSet('firstSet');
+console.log('------followSet------')
+parseTableBuilder.printSet('followSet');
+console.log('------selectionSet------')
+parseTableBuilder.printSet('selectionSet');
 
-const parser = new TopdownPaserWithParseTable(lexer);
-// lexer.runLexer();
-parser.parser();
+// const input = new Input();
+// input.setInput(`1+(2*3);`);
+// const lexer = new Lexer(input);
+// const parser = new TopdownPaserWithParseTable(lexer);
+// // lexer.runLexer();
+// parser.parser();
