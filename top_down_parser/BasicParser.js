@@ -1,4 +1,5 @@
 let Lexer = require('./Lexer');
+const { SYMBOL } = require("./SymbolDefine");
 
 
 /**
@@ -23,7 +24,7 @@ class BasicParser {
     // statements -> expression ; | expression ; statements
 
     this.expression();
-    if (this.lexer.match(Lexer.SEMI)) {
+    if (this.lexer.match(SYMBOL.SEMI)) {
       this.lexer.advance();
     } else {
       // 后面不是分号，错误。
@@ -36,7 +37,7 @@ class BasicParser {
       return;
     }
 
-    if (!this.lexer.match(Lexer.EOI)) {
+    if (!this.lexer.match(SYMBOL.EOI)) {
       this.statements();
     }
 
@@ -51,11 +52,11 @@ class BasicParser {
   }
   expr_prime() {
     // expression' -> PLUS term expression' | '空'
-    if (this.lexer.match(Lexer.PLUS)) {
+    if (this.lexer.match(SYMBOL.PLUS)) {
       this.lexer.advance();
       this.term();
       this.expr_prime();
-    } else if (this.lexer.match(Lexer.ILLEGAL_SYMBOL)) {
+    } else if (this.lexer.match(SYMBOL.ILLEGAL_SYMBOL)) {
       // 要么是加号，要么是空，出现了其他的就是错误
       console.log(
         `line: ${this.lexer.row}, col: ${
@@ -75,11 +76,11 @@ class BasicParser {
   }
   term_prime() {
     // term' -> * factor term' | '空'
-    if (this.lexer.match(Lexer.TIMES)) {
+    if (this.lexer.match(SYMBOL.TIMES)) {
       this.lexer.advance();
       this.factor();
       this.term_prime();
-    } else if (this.lexer.match(Lexer.ILLEGAL_SYMBOL)) {
+    } else if (this.lexer.match(SYMBOL.ILLEGAL_SYMBOL)) {
       // 必须是乘号开头，其他的就错了
       console.log(
         `line: ${this.lexer.row}, col: ${
@@ -94,12 +95,12 @@ class BasicParser {
   }
   factor() {
     // factor -> NUM | LP expression RP
-    if (this.lexer.match(Lexer.NUM)) {
+    if (this.lexer.match(SYMBOL.NUM)) {
       this.lexer.advance();
-    } else if (this.lexer.match(Lexer.LP)) {
+    } else if (this.lexer.match(SYMBOL.LP)) {
       this.lexer.advance();
       this.expression();
-      if (this.lexer.match(Lexer.RP)) {
+      if (this.lexer.match(SYMBOL.RP)) {
         this.lexer.advance();
       } else {
         // 末尾必须是右括号，否则错误

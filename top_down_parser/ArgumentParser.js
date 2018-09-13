@@ -1,5 +1,6 @@
 let process = require('process');
 let Lexer = require('./Lexer');
+const { SYMBOL } = require("./SymbolDefine");
 
 class ArgumentParser{
   constructor(lexer){
@@ -29,13 +30,13 @@ class ArgumentParser{
       */
      this.expression();
 
-     if(this.lexer.match(Lexer.SEMI)){
+     if(this.lexer.match(SYMBOL.SEMI)){
        this.lexer.advance();
      }else{
        console.log('1报错');process.exit(0);
      }
 
-     if(!this.lexer.match(Lexer.EOI)){
+     if(!this.lexer.match(SYMBOL.EOI)){
        this.statements();
      }
      if (this.isLegalStatement) {
@@ -55,7 +56,7 @@ class ArgumentParser{
     /*
      *  expression' -> PLUS term expression' | '空'
      */
-    if (this.lexer.match(Lexer.PLUS)) {
+    if (this.lexer.match(SYMBOL.PLUS)) {
       this.lexer.advance();
       this.term();
 
@@ -63,7 +64,7 @@ class ArgumentParser{
 
       this.expr_prime();
     }
-    else if (this.lexer.match(Lexer.UNKNOWN_SYMBOL)) {
+    else if (this.lexer.match(SYMBOL.UNKNOWN_SYMBOL)) {
       this.isLegalStatement = false;
       console.log('2报错');process.exit(0);
       return;
@@ -88,7 +89,7 @@ class ArgumentParser{
     /*
      * term' -> * factor term' | '空'
      */
-    if (this.lexer.match(Lexer.TIMES)) {
+    if (this.lexer.match(SYMBOL.TIMES)) {
       this.lexer.advance();
       this.factor();
       this.op("*");
@@ -107,14 +108,14 @@ class ArgumentParser{
     /*
      * factor -> NUM | LP expression RP
      */
-    if (this.lexer.match(Lexer.NUM)) {
+    if (this.lexer.match(SYMBOL.NUM)) {
       this.value(this.lexer.symbol);
       this.lexer.advance();
     }
-    else if (this.lexer.match(Lexer.LP)){
+    else if (this.lexer.match(SYMBOL.LP)){
       this.lexer.advance();
       this.expression();
-      if (this.lexer.match(Lexer.RP)) {
+      if (this.lexer.match(SYMBOL.RP)) {
         this.lexer.advance();
       }
       else {

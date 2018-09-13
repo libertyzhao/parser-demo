@@ -1,6 +1,7 @@
 
 let Lexer = require("./Lexer");
 let process = require("process");
+const { SYMBOL } = require("./SymbolDefine");
 
 /**
  *  statements -> expression ; | expression ; statements
@@ -32,10 +33,10 @@ class Parser {
   statements() {
     // statements -> expression ; | expression ; statements
 
-    while (!this.lexer.match(Lexer.EOI)) {
+    while (!this.lexer.match(SYMBOL.EOI)) {
       this.expression();
 
-      if (this.lexer.match(Lexer.SEMI)) {
+      if (this.lexer.match(SYMBOL.SEMI)) {
         this.lexer.advance();
       } else {
         // 后面不是分号，错误。
@@ -57,7 +58,7 @@ class Parser {
     // expression -> term expression'
     this.term();
 
-    while (this.lexer.match(Lexer.PLUS)) {
+    while (this.lexer.match(SYMBOL.PLUS)) {
       this.lexer.advance();
       this.term();
       let a = this.popStack(),
@@ -65,7 +66,7 @@ class Parser {
       this.pushStack(b + a);
     }
 
-    if (this.lexer.match(Lexer.ILLEGAL_SYMBOL)) {
+    if (this.lexer.match(SYMBOL.ILLEGAL_SYMBOL)) {
       // 要么是加号，要么是空，出现了其他的就是错误
       let info = this.lexer.input.getTokenInfo();
       console.error(
@@ -83,7 +84,7 @@ class Parser {
     // term -> factor term'
     this.factor();
 
-    while (this.lexer.match(Lexer.TIMES)) {
+    while (this.lexer.match(SYMBOL.TIMES)) {
       this.lexer.advance();
       this.factor();
       let a = this.popStack(),
@@ -91,7 +92,7 @@ class Parser {
       this.pushStack(b * a);
     }
 
-    if (this.lexer.match(Lexer.ILLEGAL_SYMBOL)) {
+    if (this.lexer.match(SYMBOL.ILLEGAL_SYMBOL)) {
       // 必须是乘号开头，其他的就错了
       let info = this.lexer.input.getTokenInfo();
       console.error(
@@ -105,14 +106,14 @@ class Parser {
 
   factor() {
     // factor -> NUM | LP expression RP
-    if (this.lexer.match(Lexer.NUM)) {
+    if (this.lexer.match(SYMBOL.NUM)) {
       this.pushStack(parseInt(this.lexer.symbol, 10));
       this.lexer.advance();
-    } else if (this.lexer.match(Lexer.LP)) {
+    } else if (this.lexer.match(SYMBOL.LP)) {
       this.lexer.advance();
       this.expression();
 
-      if (this.lexer.match(Lexer.RP)) {
+      if (this.lexer.match(SYMBOL.RP)) {
         this.lexer.advance();
       } else {
         // 末尾必须是右括号，否则错误

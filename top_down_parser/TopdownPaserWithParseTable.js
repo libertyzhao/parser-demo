@@ -85,7 +85,7 @@ class TopdownPaserWithParseTable {
           break;
         }
         case SYMBOL.EOI: {
-          if (this.lexer.match(Lexer.EOI)) {
+          if (this.lexer.match(SYMBOL.EOI)) {
             return;
           } else {
             this.parseError();
@@ -94,14 +94,14 @@ class TopdownPaserWithParseTable {
         }
         case SYMBOL.NUM_OR_ID: {
           this.popStacks();
-          if (!this.lexer.match(Lexer.NUM)) {
+          if (!this.lexer.match(SYMBOL.NUM)) {
             this.parseError();
           }
           break;
         }
         case SYMBOL.PLUS: {
           this.popStacks();
-          if (!this.lexer.match(Lexer.PLUS)) {
+          if (!this.lexer.match(SYMBOL.PLUS)) {
             this.parseError();
           }
           this.lexer.advance();
@@ -109,7 +109,7 @@ class TopdownPaserWithParseTable {
         }
         case SYMBOL.TIMES: {
           this.popStacks();
-          if (!this.lexer.match(Lexer.TIMES)) {
+          if (!this.lexer.match(SYMBOL.TIMES)) {
             this.parseError();
           }
           this.lexer.advance();
@@ -117,7 +117,7 @@ class TopdownPaserWithParseTable {
         }
         case SYMBOL.LP: {
           this.popStacks();
-          if (!this.lexer.match(Lexer.LP)) {
+          if (!this.lexer.match(SYMBOL.LP)) {
             this.parseError();
           }
           this.lexer.advance();
@@ -125,7 +125,7 @@ class TopdownPaserWithParseTable {
         }
         case SYMBOL.RP: {
           this.popStacks();
-          if (!this.lexer.match(Lexer.RP)) {
+          if (!this.lexer.match(SYMBOL.RP)) {
             this.parseError();
           }
           this.lexer.advance();
@@ -133,7 +133,7 @@ class TopdownPaserWithParseTable {
         }
         case SYMBOL.SEMI: {
           this.popStacks();
-          if (!this.lexer.match(Lexer.SEMI)) {
+          if (!this.lexer.match(SYMBOL.SEMI)) {
             this.parseError();
           }
           this.lexer.advance();

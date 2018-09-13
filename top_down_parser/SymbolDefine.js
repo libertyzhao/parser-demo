@@ -13,13 +13,13 @@ const SYMBOL = {
   ACTION_3: 515,
   ACTION_4: 516,
 
-  LP: 5,
-  NUM_OR_ID: 4,
-  PLUS: 2,
-  RP: 6,
-  SEMI: 1,
-  TIMES: 3,
   EOI: 0,
+  SEMI: 1,
+  PLUS: 2,
+  TIMES: 3,
+  NUM_OR_ID: 4,
+  LP: 5,
+  RP: 6,
   WHITE_SPACE: 7,
   UNKNOWN_SYMBOL: 8
 };

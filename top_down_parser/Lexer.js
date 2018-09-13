@@ -1,3 +1,5 @@
+const { SYMBOL } = require("./SymbolDefine");
+
 // 排除NAN
 function isNumber(num) {
   num = parseInt(num, 10);
@@ -22,19 +24,19 @@ class Lexer {
       this.symbol = text;
       switch (text) {
         case "+":
-          return Lexer.PLUS;
+          return SYMBOL.PLUS;
         case "*":
-          return Lexer.TIMES;
+          return SYMBOL.TIMES;
         case "(":
-          return Lexer.LP;
+          return SYMBOL.LP;
         case ")":
-          return Lexer.RP;
+          return SYMBOL.RP;
         case ";":
-          return Lexer.SEMI;
+          return SYMBOL.SEMI;
         default:
           if (!isNumber(text)) {
             console.error(`illegal input: ${text} `);
-            return Lexer.ILLEGAL_SYMBOL;
+            return SYMBOL.UNKNOWN_SYMBOL;
           } else {
             let token;
             while ((token = this.input.lookAhead(1)) !== undefined) {
@@ -44,11 +46,11 @@ class Lexer {
               this.symbol += token;
               this.input.advance(1);
             }
-            return Lexer.NUM;
+            return SYMBOL.NUM_OR_ID;
           }
       }
     }
-    return Lexer.EOI;
+    return SYMBOL.EOI;
   }
   match(token) {
     if (this.lookAhead === -1) {
@@ -62,7 +64,7 @@ class Lexer {
   }
   runLexer() {
     // 看一下是否到了结尾
-    while (!this.match(Lexer.EOI)) {
+    while (!this.match(SYMBOL.EOI)) {
       console.log(`Token: ${this.lookAhead}, Symbol: ${this.symbol}`);
       this.advance();
     }
@@ -70,16 +72,16 @@ class Lexer {
 }
 
 // 添加静态属性
-Object.assign(Lexer, {
-  PLUS: 2,
-  TIMES: 3,
-  LP: 5,
-  RP: 6,
-  NUM: 4,
-  SEMI: 1,
-  EOI: 0,
-  WHITE_SPACE: 7,
-  ILLEGAL_SYMBOL: 8
-});
+// Object.assign(Lexer, {
+//   PLUS: 2,
+//   TIMES: 3,
+//   LP: 5,
+//   RP: 6,
+//   NUM: 4,
+//   SEMI: 1,
+//   EOI: 0,
+//   WHITE_SPACE: 7,
+//   UNKNOWN_SYMBOL: 8
+// });
 
 module.exports = Lexer;
