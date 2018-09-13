@@ -2,6 +2,11 @@ const LRStateMachine = require("./LRStateMachine");
 const STATE_MACHINE_ACTION = require("./STATE_MACHINE_ACTION");
 const { SYMBOL } = require("../top_down_parser/SymbolDefine");
 
+/**
+ * 自底向上算法其实跟自顶向下算法，正好反过来
+ * 自顶向下：不断的进行推导，把起始符不断的进行推导展开，直到产生非终结符，然后用输入去和非终结符对比，
+ * 自底向上：不断的进行移进和规约，不断的将输入串移入，去对比推导过程，看能否规约成产生式右侧的值
+ */
 class LRParser {
   constructor(lexer) {
     this.lexer = lexer;
