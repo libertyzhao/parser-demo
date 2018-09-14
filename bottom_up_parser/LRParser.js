@@ -11,16 +11,31 @@ class LRParser {
   constructor(lexer) {
     this.lexer = lexer;
     this.stateMachine = new LRStateMachine();
-    this.parserStack = [];
+    this.statusStack = [];
     this.todo = {};
     this.lexerInput;
+    this.text = "";
+    this.names = ["t0", "t1", "t2", "t3", "t4", "t5", "t6"];
+    this.curName = 0;
+    this.valueStack = [];
+    this.parseStack = [];
+    this.parentAttribute
     this.init();
   }
+  newName(){
+    if(this.curName >= this.names.length){
+      throw Error("寄存器超出了");
+    }
+    return this.names[this.curName++];
+  }
+  freeName(s){
+    this.names[--this.curName] = s;
+  }
   init() {
-    this.parserStack.peek = function() {
+    this.statusStack.peek = function() {
       return this[this.length - 1];
     };
-    this.parserStack.push(0);
+    this.statusStack.push(0);
     this.lexer.advance();
     this.lexerInput = this.lexer.lookAhead;
 
@@ -32,49 +47,103 @@ class LRParser {
         console.log("可以接受")
       },
       [STATE_MACHINE_ACTION.s1]:() => {
-        this.parserStack.push(1);
+        this.statusStack.push(1);
+
+        this.text = this.lexer.symbol;
+        this.valueStack.push(this.lexerInput);
+        this.parseStack.push(null);
+
         this.lexer.advance();
         this.lexerInput = this.lexer.lookAhead;
       },
       [STATE_MACHINE_ACTION.s2]:() => {
-        this.parserStack.push(2);
+        this.statusStack.push(2);
+
+        this.text = this.lexer.symbol;
+        this.valueStack.push(this.lexerInput);
+        this.parseStack.push(null);
+
         this.lexer.advance();
         this.lexerInput = this.lexer.lookAhead;
       },
       [STATE_MACHINE_ACTION.s3]:() => {
-        this.parserStack.push(3);
+        this.statusStack.push(3);
+
+        this.text = this.lexer.symbol;
+        this.valueStack.push(this.lexerInput);
+        this.parseStack.push(null);
+
         this.lexer.advance();
         this.lexerInput = this.lexer.lookAhead;
       },
       [STATE_MACHINE_ACTION.s4]:() => {
-        this.parserStack.push(4);
+        this.statusStack.push(4);
+
+        this.text = this.lexer.symbol;
+        this.valueStack.push(this.lexerInput);
+        this.parseStack.push(null);
+
         this.lexer.advance();
         this.lexerInput = this.lexer.lookAhead;
       },
       [STATE_MACHINE_ACTION.r1]:() => {
-        this.parserStack.pop();
-        this.parserStack.pop();
-        this.parserStack.pop();
+
+        const topAttribute = this.valueStack[this.valueStack.length - 1]
+        const secondAttribute = this.valueStack[this.valueStack.length - 3]
+        console.log(`${secondAttribute} += ${topAttribute}`);
+        this.freeName(topAttribute)
+
+        this.statusStack.pop();
+        this.statusStack.pop();
+        this.statusStack.pop();
+
+        this.valueStack.pop();
+        this.parseStack.pop();
+        this.valueStack.pop();
+        this.parseStack.pop();
+        this.valueStack.pop();
+        this.parseStack.pop();
+
         this.lexerInput = SYMBOL.EXPR;
+
+        this.parentAttribute = secondAttribute;
+        this.parseStack.push(this.lexerInput);
+        this.valueStack.push(this.parentAttribute);
       },
       [STATE_MACHINE_ACTION.r2]:() => {
-        this.parserStack.pop();
+        this.statusStack.pop();
+
+        this.parentAttribute = this.valueStack.pop();
+        this.parseStack.pop();
+
         this.lexerInput = SYMBOL.EXPR;
+
+        this.parseStack.push(this.lexerInput);
+        this.valueStack.push(this.parentAttribute);
       },
       [STATE_MACHINE_ACTION.r3]:() => {
-        this.parserStack.pop();
+        this.statusStack.pop();
         this.lexerInput = SYMBOL.TERM;
+
+        const name = this.newName();
+        console.log(`${name} = ${this.text}`);
+        this.parentAttribute = name;
+
+        this.parseStack.pop();
+        this.valueStack.pop();
+        this.parseStack.push(this.lexerInput);
+        this.valueStack.push(this.parentAttribute);
       },
       [STATE_MACHINE_ACTION.state_2]:() => {
-        this.parserStack.push(2);
+        this.statusStack.push(2);
         this.lexerInput = this.lexer.lookAhead;
       },
       [STATE_MACHINE_ACTION.state_3]:() => {
-        this.parserStack.push(3);
+        this.statusStack.push(3);
         this.lexerInput = this.lexer.lookAhead;
       },
       [STATE_MACHINE_ACTION.state_5]:() => {
-        this.parserStack.push(5);
+        this.statusStack.push(5);
         this.lexerInput = this.lexer.lookAhead;
       },
     }
@@ -83,7 +152,7 @@ class LRParser {
   parse() {
     let action;
     do{
-      action = this.stateMachine.getAction(this.parserStack.peek(), this.lexerInput);
+      action = this.stateMachine.getAction(this.statusStack.peek(), this.lexerInput);
       const todo = this.todo[action];
       if(typeof todo === 'function'){
         todo();
