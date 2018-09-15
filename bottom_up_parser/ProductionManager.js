@@ -3,7 +3,7 @@ const Production = require("./Production");
 
 class ProductionManager {
   constructor() {
-    this.productionMap = {};
+    this.productionMap = new Map();
   }
 
   initProductions() {
@@ -46,10 +46,10 @@ class ProductionManager {
   }
 
   addProduction(production) {
-    let productionList = this.productionMap[production.getLeft()];
+    let productionList = this.productionMap.get(production.getLeft());
     if (!productionList) {
       productionList = [];
-      this.productionMap[production] = productionList;
+      this.productionMap.set(production, productionList);
     }
 
     if (productionList.indexOf(production) === -1) {
@@ -57,16 +57,17 @@ class ProductionManager {
     }
   }
 
-  getDeriveLists(left) {
-    return this.productionMap[left];
+  getProductionList(left) {
+    return this.productionMap.get(left);
   }
 
   printAllProductions() {
-    for(let productionList of this.productionMap){
+    for(let productionList of this.productionMap.values()){
       for(let production of productionList){
         production.print();
-        console.log();
       }
     }
   }
 }
+
+module.exports = ProductionManager

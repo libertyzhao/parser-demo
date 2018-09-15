@@ -43,14 +43,13 @@ class Production {
   }
 
   print(){
-    let str, printDot = false;
+    let str = getSymbolStr(this.left) + " -> ", printDot = false;
     for(let i = 0 ; i < this.right.length ; i++){
-      str = getSymbolStr(this.left) + " -> ";
       if(i === this.dotPos){
         printDot = true;
         str += ". ";
       }
-      str += SYMBOL.getSymbolStr(this.right[i]) + ' '
+      str += getSymbolStr(this.right[i]) + ' '
 
     }
     if(!printDot){
