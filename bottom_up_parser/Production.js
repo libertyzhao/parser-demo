@@ -1,5 +1,6 @@
 const { SYMBOL, getSymbolStr } = require("../top_down_parser/SymbolDefine");
 
+// 一条推导式，一个对象
 class Production {
   constructor(left, dotPos, right){
     if(dotPos > right.length){
@@ -42,13 +43,12 @@ class Production {
   }
 
   print(){
-    console.log(getSymbolStr(this.left) + " -> ");
     let str, printDot = false;
     for(let i = 0 ; i < this.right.length ; i++){
-      str = "";
+      str = getSymbolStr(this.left) + " -> ";
       if(i === this.dotPos){
         printDot = true;
-        str += ".";
+        str += ". ";
       }
       str += SYMBOL.getSymbolStr(this.right[i]) + ' '
 
