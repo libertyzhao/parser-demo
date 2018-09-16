@@ -2,12 +2,20 @@ const GrammarState = require("./GrammarState");
 const ProductionManager = require("./ProductionManager");
 const { SYMBOL, getSymbolStr } = require("../top_down_parser/SymbolDefine");
 
+/**
+ * 1、初始化0号节点，含有起始语法推导 s -> . e
+ * 2、对 . 右边的非终结符做闭包操作：. 右边的符号是非终结符，那么找到该符号作为推导式左边的所有表达式如: e -> a, e -> a + b，并且把这些推导式加入集合，并重复做闭包操作，直到没有新的推导式加入集合为止
+ * 3、对该集合进行分区，把 . 右边是相同符号的划入一个分区
+ * 4、对不同分区进行节点生成操作：
+ *    （1）如果该分区没有出现过，那么生成一个新的节点，并且把推导式对象的点号后移，产生新的推导式对象并放入新节点中
+ *    （2）如果该分区以前出现过，则通过该分区找到以前的节点，处理依赖跳转关系
+ */
 class GrammarMachine {
   constructor(productionManager) {
     this.productionManager = new ProductionManager(); // 用来管理推导式对象
     this.productionManager.initProductions(); // 初始化语法对象列表
     this.closureProductionSet = new Set(); // 记录在每一次语法节点进行闭包运算的时候，所推出的所有推导式节点
-    this.prodToGrammarStateMap = new Map(); // 记录该推导式节点属于哪个语法节点对象
+    this.prodSetToGrammarStateMap = new Map(); // 记录该推导式节点属于哪个语法节点对象
     this.symbolTypeToProductionList = new Map(); // 记录在每一次语法节点进行分区操作时，推倒类型所对应的推倒节点列表，
     this.grammarStateList = []; // 用来存储节点
     this.init();
@@ -43,16 +51,15 @@ class GrammarMachine {
         // 分区
         this.partition(grammarState);
         // 根据分区创建新节点
-        this.createNewGrammarState(grammarState, idx);
+        this.createNewGrammarState(grammarState);
         this.printGrammarStateList();
         this.closureProductionSet.clear();
         this.symbolTypeToProductionList.clear();
-        // this.prodToGrammarStateMap.clear();
+        // this.prodSetToGrammarStateMap.clear();
       }
     }
 
     this.printDerive();
-    this.prodToGrammarStateMap.clear();
   }
 
   /**
@@ -111,44 +118,39 @@ class GrammarMachine {
   /**
    * 将分区转换为新节点
    */
-  createNewGrammarState(parentGrammarState, idx) {
-    let i = 0;
-    // 便遍历分区信息
+  createNewGrammarState(parentGrammarState) {
+    // 遍历分区信息
     for (let productionSet of this.symbolTypeToProductionList.values()) {
-      let grammarState, oldGrammarState;
-      // 遍历分区中的推导式对象，此次循环只是用来检测是否存在新节点
-      // 如果存在新节点，则不管该推导式是否之前出现在其他节点过，全部加入新的节点,所以要先看该分区中是否存在新节点的诞生
+      let grammarState, dotSymbol, targetGrammarState, oldGrammarState = this.prodSetToGrammarStateMap.get(this.stringify(productionSet));
+      if(!oldGrammarState){
+        // 如果以前没出现过该分区，则生成新的节点
+        grammarState = new GrammarState();
+        this.prodSetToGrammarStateMap.set(this.stringify(productionSet), grammarState);
+        this.grammarStateList.push(grammarState);
+      }
+      targetGrammarState = grammarState;
       for (let prod of productionSet) {
-        // 注意：推导式对象中点的位置不同，该推导式对象也不同
-        // 所以这里如果该推导式属于其他节点，那这里应该记录，但是注意，如果该分区中有一个推导式对象没有出现过，那么所有该分区的推导式应该组成一个新的节点
-        oldGrammarState = this.prodToGrammarStateMap.get(prod.toString());
-        if (!oldGrammarState) {
-          grammarState = grammarState || new GrammarState();
-          this.prodToGrammarStateMap.set(prod.toString(), grammarState);
+        dotSymbol = prod.getDotSymbol();
+        // 如果是指向旧节点，则获取一个dotSymbol就可以跳出循环了
+        if(oldGrammarState){
+          targetGrammarState = oldGrammarState
+          break;
         }
+        // 将推导式的点后移，并将新的prod对象传入节点
+        grammarState.addProduction(prod.dotForward());
       }
-      // 如果出现新节点就插入
-      if(grammarState){
-        i++;
-        this.grammarStateList.splice(idx + i, 0, grammarState);
-      }
-      // 重新循环，上面第一次循环只是用来检测是否存在新节点，而这一次则是根据是否存在新节点来做出相应的操作
-      for (let prod of productionSet) {
-        const dotSymbol = prod.getDotSymbol();
-        let targetGrammarState;
-        // 如果存在新节点，则不管该推导式是否之前出现在其他节点过，全部加入新的节点
-        if (grammarState) {
-          grammarState.addProduction(prod.dotForward());
-          // 设置父节点到子节点的路径
-          targetGrammarState = grammarState;
-        } else {
-          oldGrammarState = this.prodToGrammarStateMap.get(prod.toString());
-          targetGrammarState = oldGrammarState;
-        }
-        // 设置跳转关系
-        parentGrammarState.setEdgeToNextGrammarState(dotSymbol, targetGrammarState);
-      }
+      // 处理跳转逻辑
+      parentGrammarState.setEdgeToNextGrammarState(dotSymbol, targetGrammarState);
     }
+  }
+
+  stringify(productionSet){
+    let arr = [];
+    for(let prod of productionSet){
+      // 重写了prod的toString
+      arr.push(prod.toString());
+    }
+    return arr.sort().join('')
   }
 
   // 分区分节点
