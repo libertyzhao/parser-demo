@@ -3,9 +3,6 @@ const { SYMBOL, getSymbolStr } = require("../top_down_parser/SymbolDefine");
 // 一条推导式，一个对象
 class Production {
   constructor(left, dotPos, right){
-    if(dotPos > right.length){
-      dotPos = right.length;
-    }
     this.dotPos = dotPos;
     this.left = left;
     this.right = right;
@@ -36,14 +33,14 @@ class Production {
 
   equals(prod){
     let bool = false;
-    if(this.left === prod.getLeft() && this.right === prod.getRight && this.dotPos === prod.getDotPosition()){
+    if(this.left === prod.getLeft() && this.right.toString() === prod.getRight().toString() && this.dotPos === prod.getDotPosition()){
       bool = true;
     }
     return bool;
   }
 
-  print(){
-    let str = getSymbolStr(this.left) + " -> ", printDot = false;
+  toString(){
+    let str = '    ' + getSymbolStr(this.left) + " -> ", printDot = false;
     for(let i = 0 ; i < this.right.length ; i++){
       if(i === this.dotPos){
         printDot = true;
@@ -55,6 +52,11 @@ class Production {
     if(!printDot){
       str += " . ";
     }
+    return str
+  }
+
+  print(){
+    const str = this.toString()
     console.log(str)
   }
 }

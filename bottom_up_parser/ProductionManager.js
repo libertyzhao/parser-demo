@@ -1,6 +1,7 @@
 const { SYMBOL } = require("../top_down_parser/SymbolDefine");
 const Production = require("./Production");
 
+// 语法
 class ProductionManager {
   constructor() {
     this.productionMap = new Map();
@@ -49,7 +50,7 @@ class ProductionManager {
     let productionList = this.productionMap.get(production.getLeft());
     if (!productionList) {
       productionList = [];
-      this.productionMap.set(production, productionList);
+      this.productionMap.set(production.getLeft(), productionList);
     }
 
     if (productionList.indexOf(production) === -1) {
