@@ -4,6 +4,7 @@
  * 2、如果a是一个nullable的非终结符，那么对于 s -> a b，first(s) = {a,b}
  *
  * 构建一个follow集
+ * 对某个非终结符，根据语法推导表达式构建出的所有可以跟在该非终结符后面的终结符的集合
  * 1、如果一个非终结符a后面跟着一个终结符b，那么follow(a) = {b},
  * 2、如果一个非终结符a在推导式b的末尾，形如：b -> c d a，那么follow(a) = follow(b),
  * 3、如果一个非终结符a后面跟着一个nullable的非终结符b，形如 c -> a b，那么 follow(a) = follow(b) + follow(c)

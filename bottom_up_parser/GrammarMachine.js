@@ -10,6 +10,15 @@ const { SYMBOL, getSymbolStr } = require("../top_down_parser/SymbolDefine");
  *    （1）如果该分区没有出现过，那么生成一个新的节点，并且把推导式对象的点号后移，产生新的推导式对象并放入新节点中
  *    （2）如果该分区以前出现过，则通过该分区找到以前的节点，处理依赖跳转关系
  */
+
+ /**
+  * 处理矛盾的算法
+  * 1、如果有一个点号在末尾，另一个在中间（SLR(1)语法），如：
+  *     e -> t .
+  *     t -> t . * f
+  *     当前输入字符如果属于 e 的 FOLLOW set, 那么我们就做reduce操作，否则做shift操作
+  * 2、
+  */
 class GrammarMachine {
   constructor(productionManager) {
     this.productionManager = new ProductionManager(); // 用来管理推导式对象
