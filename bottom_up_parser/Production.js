@@ -1,15 +1,35 @@
 const { SYMBOL, getSymbolStr } = require("../top_down_parser/SymbolDefine");
 
-// 一条推导式，一个对象
+
+
+/**
+ *  look ahead set:能合法的跟在某个非终结符后面的符号集合，它是follow set的子集
+ *  需要考虑的是：当前输入字符，当做了reduce操作后，在状态机当前上下文环境下，是否能合法的跟在reduce后的非终结符的后面
+ *  做了reduce之后，能合法的跟在该非终结符后面的集合，就叫look ahead set
+ */
 class Production {
   constructor(left, dotPos, right){
     this.dotPos = dotPos;
     this.left = left;
     this.right = right;
+    this.lookAheadSet = new Set([SYMBOL.EOI]); //针对于该推导式的后面能够输入的集合
   }
 
-  dotForward(){
-    return new Production(this.left, this.dotPos + 1, this.right);
+  dotForward(step){
+    const prod = new Production(this.left, this.dotPos + step, this.right);
+    prod.lookAhead = new Set();
+    for (let item of this.lookAhead) {
+      prod.lookAheadSet(item);
+    }
+    return prod
+  }
+
+  cloneSelf(){
+    return this.dotForward(0)
+  }
+
+  addLookAheadSet(symbolType){
+    this.lookAheadSet.add(symbolType);
   }
 
   getLeft(){

@@ -146,7 +146,7 @@ class GrammarMachine {
           break;
         }
         // 将推导式的点后移，并将新的prod对象传入节点
-        grammarState.addProduction(prod.dotForward());
+        grammarState.addProduction(prod.dotForward(1));
       }
       // 处理跳转逻辑
       parentGrammarState.setEdgeToNextGrammarState(dotSymbol, targetGrammarState);
