@@ -17,8 +17,8 @@ class Production {
 
   dotForward(step){
     const prod = new Production(this.left, this.dotPos + step, this.right);
-    prod.lookAhead = new Set();
-    for (let item of this.lookAhead) {
+    prod.lookAheadSet = new Set();
+    for (let item of this.lookAheadSet) {
       prod.lookAheadSet(item);
     }
     return prod
